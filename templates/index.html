@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Dashboard</title>
+</head>
+<body>
+    <h1>User Dashboard</h1>
+    <h2>Assets</h2>
+    <ul>
+        {% for asset in assets %}
+            <li>{{ asset.symbol }}: {{ asset.balance }} (USD Price: {{ asset.usd_price }})</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

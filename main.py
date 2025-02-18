@@ -5,9 +5,9 @@ from dataclasses import dataclass
 
 from fastapi import FastAPI
 
-from utils import get_crypto_price
-from db import engine
-from models import Base
+from api.api_utils import get_crypto_price
+from db.db import engine
+from db.models import Base
 from contextlib import asynccontextmanager
 from api.api import router
 
@@ -30,7 +30,7 @@ STRATEGY = 'SELL'
 def load_strategies(file_path: str) -> dict:
 	with open(file_path, 'r') as file:
 		strategies = yaml.safe_load(file)
-	return strategies.get(STRATEGY, {})
+	return strategies
 
 
 @dataclass
@@ -43,16 +43,16 @@ class Asset:
 class Wallet:
 	"""
 	:param assets: tuple of Asset objects
-	:param strategy: dict, optional
+	:param strategies: dict, optional
 	"""
 
 	def __init__(
 			self,
 			assets: tuple[Asset, ...],
-			strategy: Dict[str, float] = None
+			strategies: Dict[str, float] = None
 	):
 		self.assets = assets
-		self.strategy = strategy
+		self.strategies = strategies
 		self.set_usd_value_for_each_asset_in_wallet()
 
 	@property

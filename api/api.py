@@ -1,13 +1,14 @@
 
-from fastapi import APIRouter, Depends
-from exceptions import not_found_exception
-from models import User, Wallet, Asset
-from db import get_session
-from schemas import WalletSchema, AssetSchema, UserSchema
+from fastapi import APIRouter, Depends, Request
+from fastapi.templating import Jinja2Templates
+from api.exceptions import not_found_exception
+from db.models import User, Wallet, Asset
+from db.db import get_session
+from api.schemas import WalletSchema, AssetSchema, UserSchema
 
 
-# ------ Routes ------ #
 router = APIRouter()
+templates = Jinja2Templates(directory="templates")
 
 
 @router.post('/users/', response_model=UserSchema)
@@ -79,3 +80,22 @@ async def update_asset(asset_id: int, asset: AssetSchema, session=Depends(get_se
     await session.commit()
     await session.refresh(asset)
     return asset
+
+
+@router.get('/users/{user_id}/dashboard')
+async def get_user_dashboard(request: Request, user_id: int, session=Depends(get_session)):
+    user = await session.get(User, user_id)
+    if not user:
+        return not_found_exception('User')
+
+    wallet = await session.get(Wallet, user_id)
+    if not wallet:
+        return not_found_exception('Wallet')
+
+    assets = wallet.assets
+
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "user": user,
+        "assets": assets
+    })
